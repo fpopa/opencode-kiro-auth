@@ -76,6 +76,7 @@ export const createKiroPlugin = (providerId: string) => async (
 
         return {
           apiKey: '',
+          baseURL: KIRO_CONSTANTS.BASE_URL.replace('/generateAssistantResponse', '').replace('{{region}}', config.default_region || 'us-east-1'),
           async fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
             const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
 
