@@ -16,7 +16,7 @@ Add the plugin to your `opencode.json` or `opencode.jsonc`:
 
 ```json
 {
-  "plugin": ["opencode-kiro-auth"],
+  "plugin": ["@zhafron/opencode-kiro-auth"],
   "provider": {
     "kiro": {
       "models": {
