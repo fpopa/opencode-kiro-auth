@@ -1,5 +1,5 @@
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { join, dirname } from "node:path";
 import { homedir } from "node:os";
 import { AccountSelectionStrategySchema, KiroConfigSchema, RegionSchema, DEFAULT_CONFIG, type KiroConfig } from "./schema";
 import * as logger from "../logger";
@@ -15,6 +15,19 @@ function getConfigDir(): string {
 
 export function getUserConfigPath(): string {
   return join(getConfigDir(), "kiro.json");
+}
+
+function ensureUserConfigTemplate(): void {
+  const path = getUserConfigPath();
+  if (!existsSync(path)) {
+    try {
+      mkdirSync(dirname(path), { recursive: true });
+      writeFileSync(path, JSON.stringify(DEFAULT_CONFIG, null, 2), "utf-8");
+      logger.log(`Created default config template at ${path}`);
+    } catch (error) {
+      logger.warn(`Failed to create config template at ${path}: ${String(error)}`);
+    }
+  }
 }
 
 export function getProjectConfigPath(directory: string): string {
@@ -89,15 +102,9 @@ function applyEnvOverrides(config: KiroConfig): KiroConfig {
   return {
     ...config,
 
-    quiet_mode: parseBooleanEnv(env.KIRO_QUIET_MODE, config.quiet_mode),
-
-    debug: parseBooleanEnv(env.KIRO_DEBUG, config.debug),
-
     session_recovery: parseBooleanEnv(env.KIRO_SESSION_RECOVERY, config.session_recovery),
 
     auto_resume: parseBooleanEnv(env.KIRO_AUTO_RESUME, config.auto_resume),
-
-    max_recovery_attempts: parseNumberEnv(env.KIRO_MAX_RECOVERY_ATTEMPTS, config.max_recovery_attempts),
 
     proactive_token_refresh: parseBooleanEnv(env.KIRO_PROACTIVE_TOKEN_REFRESH, config.proactive_token_refresh),
 
@@ -112,18 +119,12 @@ function applyEnvOverrides(config: KiroConfig): KiroConfig {
     ),
 
     account_selection_strategy: env.KIRO_ACCOUNT_SELECTION_STRATEGY
-      ? AccountSelectionStrategySchema.catch('sticky').parse(env.KIRO_ACCOUNT_SELECTION_STRATEGY)
+      ? AccountSelectionStrategySchema.catch('lowest-usage').parse(env.KIRO_ACCOUNT_SELECTION_STRATEGY)
       : config.account_selection_strategy,
-
-    thinking_enabled: parseBooleanEnv(env.KIRO_THINKING_ENABLED, config.thinking_enabled),
-
-    thinking_budget_tokens: parseNumberEnv(env.KIRO_THINKING_BUDGET_TOKENS, config.thinking_budget_tokens),
 
     default_region: env.KIRO_DEFAULT_REGION
       ? RegionSchema.catch('us-east-1').parse(env.KIRO_DEFAULT_REGION)
       : config.default_region,
-
-    request_timeout_ms: parseNumberEnv(env.KIRO_REQUEST_TIMEOUT_MS, config.request_timeout_ms),
 
     rate_limit_retry_delay_ms: parseNumberEnv(
       env.KIRO_RATE_LIMIT_RETRY_DELAY_MS,
@@ -132,18 +133,13 @@ function applyEnvOverrides(config: KiroConfig): KiroConfig {
 
     rate_limit_max_retries: parseNumberEnv(env.KIRO_RATE_LIMIT_MAX_RETRIES, config.rate_limit_max_retries),
 
-    quota_warning_threshold: parseNumberEnv(env.KIRO_QUOTA_WARNING_THRESHOLD, config.quota_warning_threshold),
-
     usage_tracking_enabled: parseBooleanEnv(env.KIRO_USAGE_TRACKING_ENABLED, config.usage_tracking_enabled),
-
-    usage_fetch_interval_seconds: parseNumberEnv(
-      env.KIRO_USAGE_FETCH_INTERVAL_SECONDS,
-      config.usage_fetch_interval_seconds
-    ),
   };
 }
 
+
 export function loadConfig(directory: string): KiroConfig {
+  ensureUserConfigTemplate();
   let config: KiroConfig = { ...DEFAULT_CONFIG };
 
   const userConfigPath = getUserConfigPath();

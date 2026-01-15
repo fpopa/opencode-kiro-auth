@@ -90,7 +90,7 @@ export const createKiroPlugin = (providerId: string) => async (
             const providerOptions = body.providerOptions || {};
             const thinkingConfig = providerOptions.thinkingConfig;
             const thinkingEnabled = isThinkingModel || !!thinkingConfig;
-            const thinkingBudget = thinkingConfig?.thinkingBudget || config.thinking_budget_tokens;
+            const thinkingBudget = thinkingConfig?.thinkingBudget || 20000;
 
             const rateLimitStateByAccount = new Map<string, { consecutive429: number; lastAt: number }>();
             const RATE_LIMIT_DEDUP_WINDOW_MS = 2000;
