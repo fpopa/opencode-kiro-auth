@@ -1,20 +1,11 @@
 function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;')
 }
 
-export function getIDCAuthHtml(
-  verificationUrl: string,
-  userCode: string,
-  statusUrl: string
-): string {
-  const escapedUrl = escapeHtml(verificationUrl);
-  const escapedCode = escapeHtml(userCode);
-  const escapedStatusUrl = escapeHtml(statusUrl);
+export function getIDCAuthHtml(verificationUrl: string, userCode: string, statusUrl: string): string {
+  const escapedUrl = escapeHtml(verificationUrl)
+  const escapedCode = escapeHtml(userCode)
+  const escapedStatusUrl = escapeHtml(statusUrl)
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -256,7 +247,7 @@ export function getIDCAuthHtml(
     checkStatus();
   </script>
 </body>
-</html>`;
+</html>`
 }
 
 export function getSuccessHtml(): string {
@@ -401,11 +392,11 @@ export function getSuccessHtml(): string {
     }, 1000);
   </script>
 </body>
-</html>`;
+</html>`
 }
 
 export function getErrorHtml(message: string): string {
-  const escapedMessage = escapeHtml(message);
+  const escapedMessage = escapeHtml(message)
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -578,5 +569,5 @@ export function getErrorHtml(message: string): string {
     }, 1000);
   </script>
 </body>
-</html>`;
+</html>`
 }

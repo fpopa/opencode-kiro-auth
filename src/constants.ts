@@ -1,35 +1,35 @@
-import type { KiroRegion } from './plugin/types';
+import type { KiroRegion } from './plugin/types'
 
-const VALID_REGIONS: readonly KiroRegion[] = ['us-east-1', 'us-west-2'];
+const VALID_REGIONS: readonly KiroRegion[] = ['us-east-1', 'us-west-2']
 
 export function isValidRegion(region: string): region is KiroRegion {
-  return VALID_REGIONS.includes(region as KiroRegion);
+  return VALID_REGIONS.includes(region as KiroRegion)
 }
 
 export function normalizeRegion(region: string | undefined): KiroRegion {
   if (!region || !isValidRegion(region)) {
-    return 'us-east-1';
+    return 'us-east-1'
   }
-  return region;
+  return region
 }
 
 export function buildUrl(template: string, region: KiroRegion): string {
-  const url = template.replace('{{region}}', region);
-  
+  const url = template.replace('{{region}}', region)
+
   try {
-    new URL(url);
-    return url;
+    new URL(url)
+    return url
   } catch {
-    throw new Error(`Invalid URL generated: ${url}`);
+    throw new Error(`Invalid URL generated: ${url}`)
   }
 }
 
 export function validateUrl(url: string): boolean {
   try {
-    new URL(url);
-    return true;
+    new URL(url)
+    return true
   } catch {
-    return false;
+    return false
   }
 }
 
@@ -44,32 +44,26 @@ export const KIRO_CONSTANTS = {
   USER_AGENT: 'KiroIDE',
   KIRO_VERSION: '0.7.5',
   CHAT_TRIGGER_TYPE_MANUAL: 'MANUAL',
-  ORIGIN_AI_EDITOR: 'AI_EDITOR',
-};
+  ORIGIN_AI_EDITOR: 'AI_EDITOR'
+}
 
 export const MODEL_MAPPING: Record<string, string> = {
-    "claude-opus-4-5":"claude-opus-4.5",
-    "claude-opus-4-5-thinking":"claude-opus-4.5",
-    "claude-opus-4-5-20251101":"claude-opus-4.5",
-    "claude-haiku-4-5":"claude-haiku-4.5",
-    "claude-sonnet-4-5": "CLAUDE_SONNET_4_5_20250929_V1_0",
-    "claude-sonnet-4-5-thinking": "CLAUDE_SONNET_4_5_20250929_V1_0",
-    "claude-sonnet-4-5-20250929": "CLAUDE_SONNET_4_5_20250929_V1_0",
-    "claude-sonnet-4-20250514": "CLAUDE_SONNET_4_20250514_V1_0",
-    "claude-3-7-sonnet-20250219": "CLAUDE_3_7_SONNET_20250219_V1_0"
-};
+  'claude-opus-4-5': 'claude-opus-4.5',
+  'claude-opus-4-5-thinking': 'claude-opus-4.5',
+  'claude-opus-4-5-20251101': 'claude-opus-4.5',
+  'claude-haiku-4-5': 'claude-haiku-4.5',
+  'claude-sonnet-4-5': 'CLAUDE_SONNET_4_5_20250929_V1_0',
+  'claude-sonnet-4-5-thinking': 'CLAUDE_SONNET_4_5_20250929_V1_0',
+  'claude-sonnet-4-5-20250929': 'CLAUDE_SONNET_4_5_20250929_V1_0',
+  'claude-sonnet-4-20250514': 'CLAUDE_SONNET_4_20250514_V1_0',
+  'claude-3-7-sonnet-20250219': 'CLAUDE_3_7_SONNET_20250219_V1_0'
+}
 
-export const SUPPORTED_MODELS = Object.keys(MODEL_MAPPING);
+export const SUPPORTED_MODELS = Object.keys(MODEL_MAPPING)
 
 export const KIRO_AUTH_SERVICE = {
   ENDPOINT: 'https://prod.{{region}}.auth.desktop.kiro.dev',
   SSO_OIDC_ENDPOINT: 'https://oidc.{{region}}.amazonaws.com',
   BUILDER_ID_START_URL: 'https://view.awsapps.com/start',
-  SCOPES: [
-    'codewhisperer:completions',
-    'codewhisperer:analysis',
-    'codewhisperer:conversations',
-    'codewhisperer:transformations',
-    'codewhisperer:taskassist'
-  ],
-};
+  SCOPES: ['codewhisperer:completions', 'codewhisperer:analysis', 'codewhisperer:conversations', 'codewhisperer:transformations', 'codewhisperer:taskassist']
+}
