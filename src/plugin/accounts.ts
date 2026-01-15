@@ -103,6 +103,7 @@ export class AccountManager {
       region: meta.region,
       profileArn: meta.profileArn,
       clientId: meta.clientId,
+      clientSecret: meta.clientSecret,
       refreshToken: meta.refreshToken,
       accessToken: meta.accessToken,
       expiresAt: meta.expiresAt,
@@ -261,6 +262,7 @@ export class AccountManager {
       region: account.region,
       profileArn: account.profileArn,
       clientId: account.clientId,
+      clientSecret: account.clientSecret,
       refreshToken: account.refreshToken,
       accessToken: account.accessToken,
       expiresAt: account.expiresAt,
@@ -286,6 +288,7 @@ export class AccountManager {
       refreshToken: account.refreshToken,
       profileArn: account.profileArn,
       clientId: account.clientId,
+      clientSecret: account.clientSecret,
       authMethod: account.authMethod,
     };
     
@@ -297,6 +300,7 @@ export class AccountManager {
       region: account.region,
       profileArn: account.profileArn,
       clientId: account.clientId,
+      clientSecret: account.clientSecret,
       email: account.email,
     };
   }
