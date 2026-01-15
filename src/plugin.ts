@@ -90,9 +90,10 @@ export const createKiroPlugin = (providerId: string) => async (
             const body = init?.body ? JSON.parse(init.body as string) : {};
             const model = extractModelFromUrl(url) || body.model || 'claude-opus-4-5';
             
+            const isThinkingModel = model.endsWith('-thinking');
             const providerOptions = body.providerOptions || {};
             const thinkingConfig = providerOptions.thinkingConfig;
-            const thinkingEnabled = !!thinkingConfig;
+            const thinkingEnabled = isThinkingModel || !!thinkingConfig;
             const thinkingBudget = thinkingConfig?.thinkingBudget || config.thinking_budget_tokens;
 
             let retryCount = 0;
