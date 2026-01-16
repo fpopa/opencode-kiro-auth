@@ -105,25 +105,6 @@ function applyEnvOverrides(config: KiroConfig): KiroConfig {
   return {
     ...config,
 
-    session_recovery: parseBooleanEnv(env.KIRO_SESSION_RECOVERY, config.session_recovery),
-
-    auto_resume: parseBooleanEnv(env.KIRO_AUTO_RESUME, config.auto_resume),
-
-    proactive_token_refresh: parseBooleanEnv(
-      env.KIRO_PROACTIVE_TOKEN_REFRESH,
-      config.proactive_token_refresh
-    ),
-
-    token_refresh_interval_seconds: parseNumberEnv(
-      env.KIRO_TOKEN_REFRESH_INTERVAL_SECONDS,
-      config.token_refresh_interval_seconds
-    ),
-
-    token_refresh_buffer_seconds: parseNumberEnv(
-      env.KIRO_TOKEN_REFRESH_BUFFER_SECONDS,
-      config.token_refresh_buffer_seconds
-    ),
-
     account_selection_strategy: env.KIRO_ACCOUNT_SELECTION_STRATEGY
       ? AccountSelectionStrategySchema.catch('lowest-usage').parse(
           env.KIRO_ACCOUNT_SELECTION_STRATEGY
@@ -147,6 +128,11 @@ function applyEnvOverrides(config: KiroConfig): KiroConfig {
     usage_tracking_enabled: parseBooleanEnv(
       env.KIRO_USAGE_TRACKING_ENABLED,
       config.usage_tracking_enabled
+    ),
+
+    enable_log_api_request: parseBooleanEnv(
+      env.KIRO_ENABLE_LOG_API_REQUEST,
+      config.enable_log_api_request
     )
   }
 }
