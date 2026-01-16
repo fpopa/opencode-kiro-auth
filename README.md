@@ -9,6 +9,9 @@ OpenCode plugin for AWS Kiro (CodeWhisperer) providing access to the latest Clau
 - Automated token refresh and rate limit handling with exponential backoff.
 - Native thinking mode support via virtual model mappings.
 - Decoupled storage for credentials and real-time usage metadata.
+- Configurable request timeout and iteration limits to prevent hangs.
+- Automatic port selection for auth server to avoid conflicts.
+- Usage tracking with automatic retry on sync failures.
 
 ## Installation
 
@@ -68,11 +71,70 @@ Add the plugin to your `opencode.json` or `opencode.jsonc`:
 3. Follow the terminal instructions to complete the AWS Builder ID authentication.
 4. Configuration template will be automatically created at `~/.config/opencode/kiro.json` on first load.
 
+## Configuration
+
+The plugin supports extensive configuration options. Edit `~/.config/opencode/kiro.json`:
+
+```json
+{
+  "account_selection_strategy": "lowest-usage",
+  "default_region": "us-east-1",
+  "rate_limit_retry_delay_ms": 5000,
+  "rate_limit_max_retries": 3,
+  "max_request_iterations": 100,
+  "request_timeout_ms": 300000,
+  "token_expiry_buffer_ms": 120000,
+  "usage_sync_max_retries": 3,
+  "auth_server_port_start": 19847,
+  "auth_server_port_range": 10,
+  "usage_tracking_enabled": true,
+  "enable_log_api_request": false
+}
+```
+
+### Configuration Options
+
+- `account_selection_strategy`: Account rotation strategy (`sticky`, `round-robin`, `lowest-usage`)
+- `default_region`: AWS region (`us-east-1`, `us-west-2`)
+- `rate_limit_retry_delay_ms`: Delay between rate limit retries (1000-60000ms)
+- `rate_limit_max_retries`: Maximum retry attempts for rate limits (0-10)
+- `max_request_iterations`: Maximum loop iterations to prevent hangs (10-1000)
+- `request_timeout_ms`: Request timeout in milliseconds (60000-600000ms)
+- `token_expiry_buffer_ms`: Token refresh buffer time (30000-300000ms)
+- `usage_sync_max_retries`: Retry attempts for usage sync (0-5)
+- `auth_server_port_start`: Starting port for auth server (1024-65535)
+- `auth_server_port_range`: Number of ports to try (1-100)
+- `usage_tracking_enabled`: Enable usage tracking and toast notifications
+- `enable_log_api_request`: Enable detailed API request logging
+
+### Environment Variables
+
+All configuration options can be overridden via environment variables:
+
+- `KIRO_ACCOUNT_SELECTION_STRATEGY`
+- `KIRO_DEFAULT_REGION`
+- `KIRO_RATE_LIMIT_RETRY_DELAY_MS`
+- `KIRO_RATE_LIMIT_MAX_RETRIES`
+- `KIRO_MAX_REQUEST_ITERATIONS`
+- `KIRO_REQUEST_TIMEOUT_MS`
+- `KIRO_TOKEN_EXPIRY_BUFFER_MS`
+- `KIRO_USAGE_SYNC_MAX_RETRIES`
+- `KIRO_AUTH_SERVER_PORT_START`
+- `KIRO_AUTH_SERVER_PORT_RANGE`
+- `KIRO_USAGE_TRACKING_ENABLED`
+- `KIRO_ENABLE_LOG_API_REQUEST`
+
 ## Storage
 
+**Linux/macOS:**
 - Credentials: `~/.config/opencode/kiro-accounts.json`
 - Usage Tracking: `~/.config/opencode/kiro-usage.json`
 - Plugin Config: `~/.config/opencode/kiro.json`
+
+**Windows:**
+- Credentials: `%APPDATA%\opencode\kiro-accounts.json`
+- Usage Tracking: `%APPDATA%\opencode\kiro-usage.json`
+- Plugin Config: `%APPDATA%\opencode\kiro.json`
 
 ## Acknowledgements
 
