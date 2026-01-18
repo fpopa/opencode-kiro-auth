@@ -338,11 +338,7 @@ export function mergeAdjacentMessages(msgs: any[]): any[] {
 }
 
 export function convertToolsToCodeWhisperer(tools: any[]): any[] {
-  return tools
-    .filter(
-      (t) => !['web_search', 'websearch'].includes((t.name || t.function?.name || '').toLowerCase())
-    )
-    .map((t) => ({
+  return tools.map((t) => ({
       toolSpecification: {
         name: t.name || t.function?.name,
         description: (t.description || t.function?.description || '').substring(0, 9216),
