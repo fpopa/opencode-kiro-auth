@@ -270,6 +270,39 @@ export function transformToCodeWhisperer(
     if (curTrs.length) ctx.toolResults = deduplicateToolResults(curTrs)
     if (cwTools.length) ctx.tools = cwTools
     if (Object.keys(ctx).length) uim.userInputMessageContext = ctx
+
+    const hasToolsInHistory = historyHasToolCalling(history)
+    if (hasToolsInHistory) {
+      const toolNamesInHistory = extractToolNamesFromHistory(history)
+      if (toolNamesInHistory.size > 0) {
+        const existingTools = uim.userInputMessageContext?.tools || []
+        const existingToolNames = new Set(
+          existingTools.map((t: any) => t.toolSpecification?.name).filter(Boolean)
+        )
+        const missingToolNames = Array.from(toolNamesInHistory).filter(
+          (name) => !existingToolNames.has(name)
+        )
+        if (missingToolNames.length > 0) {
+          logger.log(
+            `[Kiro] Adding ${missingToolNames.length} missing tool definitions: ${missingToolNames.join(', ')}`
+          )
+          const placeholderTools = missingToolNames.map((name) => ({
+            toolSpecification: {
+              name,
+              description: 'Tool',
+              inputSchema: {
+                json: {
+                  type: 'object',
+                  properties: {}
+                }
+              }
+            }
+          }))
+          if (!uim.userInputMessageContext) uim.userInputMessageContext = {}
+          uim.userInputMessageContext.tools = [...existingTools, ...placeholderTools]
+        }
+      }
+    }
   }
 
   const machineId = crypto
@@ -339,12 +372,12 @@ export function mergeAdjacentMessages(msgs: any[]): any[] {
 
 export function convertToolsToCodeWhisperer(tools: any[]): any[] {
   return tools.map((t) => ({
-      toolSpecification: {
-        name: t.name || t.function?.name,
-        description: (t.description || t.function?.description || '').substring(0, 9216),
-        inputSchema: { json: t.input_schema || t.function?.parameters || {} }
-      }
-    }))
+    toolSpecification: {
+      name: t.name || t.function?.name,
+      description: (t.description || t.function?.description || '').substring(0, 9216),
+      inputSchema: { json: t.input_schema || t.function?.parameters || {} }
+    }
+  }))
 }
 
 function getContentText(m: any): string {
@@ -369,4 +402,24 @@ function deduplicateToolResults(trs: any[]): any[] {
     }
   }
   return u
+}
+
+function historyHasToolCalling(history: CodeWhispererMessage[]): boolean {
+  return history.some(
+    (h) =>
+      h.assistantResponseMessage?.toolUses ||
+      h.userInputMessage?.userInputMessageContext?.toolResults
+  )
+}
+
+function extractToolNamesFromHistory(history: CodeWhispererMessage[]): Set<string> {
+  const toolNames = new Set<string>()
+  for (const h of history) {
+    if (h.assistantResponseMessage?.toolUses) {
+      for (const tu of h.assistantResponseMessage.toolUses) {
+        if (tu.name) toolNames.add(tu.name)
+      }
+    }
+  }
+  return toolNames
 }
