@@ -68,17 +68,61 @@ async function withLock<T>(path: string, fn: () => Promise<T>): Promise<T> {
 export async function loadAccounts(): Promise<AccountStorage> {
   const path = getStoragePath()
   return withLock(path, async () => {
+    // Try loading from our storage first
     try {
       const content = await fs.readFile(path, 'utf-8')
       const parsed = JSON.parse(content)
-      if (!parsed || !Array.isArray(parsed.accounts)) {
-        return { version: 1, accounts: [], activeIndex: -1 }
+      if (parsed && Array.isArray(parsed.accounts) && parsed.accounts.length > 0) {
+        return parsed
       }
-      return parsed
     } catch {
-      return { version: 1, accounts: [], activeIndex: -1 }
+      // Fall through to Kiro IDE fallback
     }
+
+    // Fallback: try loading from Kiro IDE cache
+    const kiroAccount = await tryLoadKiroIDEAccount()
+    if (kiroAccount) {
+      return { version: 1, accounts: [kiroAccount], activeIndex: 0 }
+    }
+    return { version: 1, accounts: [], activeIndex: -1 }
   })
+}
+
+async function tryLoadKiroIDEAccount() {
+  try {
+    const kiroTokenPath = join(homedir(), '.aws', 'sso', 'cache', 'kiro-auth-token.json')
+    const tokenContent = await fs.readFile(kiroTokenPath, 'utf-8')
+    const token = JSON.parse(tokenContent)
+
+    if (!token.accessToken || !token.refreshToken) return null
+
+    const clientIdHash = token.clientIdHash
+    if (!clientIdHash) return null
+
+    const clientPath = join(homedir(), '.aws', 'sso', 'cache', `${clientIdHash}.json`)
+    const clientContent = await fs.readFile(clientPath, 'utf-8')
+    const client = JSON.parse(clientContent)
+
+    const expiresAt =
+      typeof token.expiresAt === 'string' ? new Date(token.expiresAt).getTime() : token.expiresAt
+
+    return {
+      id: 'kiro-ide-pro',
+      email: 'pro@kiro.dev',
+      realEmail: 'pro@kiro.dev',
+      authMethod: 'idc' as const,
+      region: (token.region || 'us-east-1') as 'us-east-1' | 'us-west-2',
+      clientId: client.clientId,
+      clientSecret: client.clientSecret,
+      refreshToken: token.refreshToken,
+      accessToken: token.accessToken,
+      expiresAt,
+      rateLimitResetTime: 0,
+      isHealthy: true
+    }
+  } catch {
+    return null
+  }
 }
 
 export async function saveAccounts(storage: AccountStorage): Promise<void> {
